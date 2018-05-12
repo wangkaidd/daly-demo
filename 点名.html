@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		div {
+			margin:0 auto;
+			height: 600px;
+			width: 600px;
+			border:3px solid green;
+		}
+		ul {
+			margin:0;
+			padding:0;
+			list-style: none;
+		}
+		li {
+			float: left;
+			height: 200px;
+			width: 200px;
+			box-sizing: border-box;
+			border:1px solid red;
+			list-style: none;
+			margin:0;
+			padding:0;
+			text-align: center;
+			line-height:200px;
+		}
+	</style>
+</head>
+<body>
+<div>
+	<ul>
+		<li index='1'>A</li>
+		<li index='2'>B</li>
+		<li index='3'>C</li>
+		<li index='4'>D</li>
+		<li index='5'>E</li>
+		<li index='6'>F</li>
+		<li index='7'>G</li>
+		<li index='8'>H</li>
+		<li index='9'>I</li>
+	</ul>
+</div>
+<input type="button" value="开始">
+	<script>
+	var input = document.getElementsByTagName('input')[0];
+	var liarr = document.getElementsByTagName('li');
+	// console.log(liarr[4].innerHTML);
+	// 为input标签添加点击事件
+	input.onclick = function(){
+		if(this.value=="开始"){
+			this.value = '结束';
+			timer=setInterval(function(){
+				var num = Math.ceil(Math.random()*9+1);
+				for(var i =0;i < liarr[i].length;i++){
+					for(var j = 0;j < liarr[j].length;j++) {
+						liarr[j].style.backgroundColor = '';
+					}
+					if(liarr[i].index == num){
+						liarr[i].style.backgroundColor = 'red';
+					}
+				}
+				
+
+				
+			},1000)
+		} else {
+			clearInterval(timer);
+			this.value = '开始';
+		}
+
+
+
+
+
+
+
+	}
+	</script>
+	
+</body>
+</html>

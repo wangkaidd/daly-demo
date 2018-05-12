@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<style>
+	* {
+		margin:0;
+		padding:0;
+	}
+	.box{
+		position:absolute;
+		left:50%;
+		top:50%;
+		margin-left:-200px;
+		margin-top:-300px;
+		width: 400px;
+		height: 600px;
+		background-color: yellowgreen;
+	}
+
+</style>
+<body>
+
+	<div class="box"></div>
+	<button>登录</button>
+
+	<script src="./lib/jquery-1.12.1.js"></script>
+	<script>
+			$('.box').hide();
+			$('button').on('click',function () {
+				$('body').css('backgroundColor','rgba(0,0,0,0.1)')
+				$('.box').show(1)
+			});
+			</script>
+</body>
+</html>

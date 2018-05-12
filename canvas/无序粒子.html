@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+    <canvas id="cas" width="468" height="719"></canvas>
+  <!-- <script>
+    // 这种效果一眼看过去，就知道其实就是一堆粒子在进行无序的运动。
+    // 然后当粒子与粒子之间的距离小于一定值后，就进行连线，
+    // 并且根据距离的大小来对线条的粗细进行一些更改，
+    // 就可以做出这种有点像蛛网的感觉了。原理很简单，直接上代码：
+    var dots = [];
+    for (var i = 0; i < 200; i++) {
+      var x = Math.random() * (canvas.width + 2 * extendDis) - extendDis;
+      var y = Math.random() * (canvas.height + 2 * extendDis) - extendDis;
+      var xa = (Math.random() * 2 - 1) / 1.5;
+      var ya = (Math.random() * 2 - 1) / 1.5;
+
+      dots.push({ x, y, xa, ya })
+    }
+    //   首先，用一个数组，装载两百个分散在canvas各处的粒子对象，并且给每个对象一个随机的运动趋势。
+    //   也就是xa和ya，用于表示垂直和水平的运动趋势。其实就是一个用于每次循环的时候进行叠加的值。
+    // 　　实例化好两百个粒子对象后。就可以让他们开始运动：
+    dot.x += dot.xa;
+    dot.y += dot.ya;
+
+    // 遇到边界将速度反向
+    dot.xa *= (dot.x > (canvas.width + extendDis) || dot.x < -extendDis) ? -1 : 1;
+    dot.ya *= (dot.y > (canvas.height + extendDis) || dot.y < -extendDis) ? -1 : 1;
+
+    // 绘制点
+    ctx.fillStyle = `rgba(${rgb},${rgb},${rgb},1`;
+    ctx.fillRect(dot.x - 0.5, dot.y - 0.5, 1, 1);
+    //     运动的逻辑也很简单，每次给粒子更新新的状态，
+    //     其实就是根据此前初始化粒子的时候给予的xa和ya，进行一个累加，就可以形成运动的效果了。
+    // 　　当然，粒子不能往一个方向无限的运动下去，所以我们还需要判断粒子是否运动到边界了，
+    //     如果运动到了边界，就把运动趋势进行反转。也就做出了一种粒子反弹的效果。
+    //     上面的extendDis其实是我为了让粒子反弹点在canvas外而定义的一个变量，用于控制粒子跑到离开canvas多远后才进行反弹。
+    // 　　当然，每次运动完都对粒子进行一个绘制。这一段代码会放到一个叫move的function里。
+    // 　　就上面的一些代码，就完成了粒子的初始化，以及运动了。接下来就是画线了。逻辑也很简单，就是遍历，逐个粒子计算距离，
+    //     当两个比较的粒子之间的距离小于某个值，就进行画线。代码如下：
+    /**
+       * 逐个对比连线
+       * @param ndots
+       */
+    function bubDrawLine(ndots) {
+      var ndot;
+
+      dots.forEach(function (dot) {
+
+        move(dot);
+
+        // 循环比对粒子间的距离
+        for (var i = 0; i < ndots.length; i++) {
+          ndot = ndots[i];
+
+          if (dot === ndot || ndot.x === null || ndot.y === null) continue;
+
+          var xc = dot.x - ndot.x;
+          var yc = dot.y - ndot.y;
+
+          // 如果x轴距离或y轴距离大于max,则不计算粒子距离
+          if (xc > ndot.max || yc > lineDis) continue;
+
+          // 两个粒子之间的距离
+          var dis = xc * xc + yc * yc;
+
+          // 如果粒子距离超过max,则不做处理
+          if (dis > lineDis) continue;
+
+          // 距离比
+          var ratio;
+
+          // 如果是鼠标，则让粒子向鼠标的位置移动
+          if (ndot === warea && dis < 20000) {
+            dot.x -= xc * 0.01;
+            dot.y -= yc * 0.01;
+          }
+
+          // 计算距离比
+          ratio = (lineDis - dis) / lineDis;
+
+          // 粒子间连线
+          ctx.beginPath();
+          ctx.lineWidth = ratio / 2;
+          ctx.strokeStyle = `rgba(${rgb},${rgb},${rgb},${ratio + 0.2}`;
+          ctx.moveTo(dot.x, dot.y);
+          ctx.lineTo(ndot.x, ndot.y);
+          ctx.stroke();
+        }
+
+        // 将已经计算过的粒子从数组中删除
+        ndots.splice(ndots.indexOf(dot), 1);
+      });
+    }
+    //   逻辑也比较简单，就是遍历数组，把遍历到的粒子跟其他粒子进行逐个比对。
+    //   当距离小于上面的lineDis的时候，就进行连线。为了减少计算量，每次计算过的粒子将会从用于计算的ndots数组中删除，
+    //   避免重复计算。同时如果两个粒子的垂直距离和水平距离大于lineDis，那也就没必要再算两个粒子的距离了，直接不做处理，从而减少计算量。
+    // 　　其实这个计算用的还是所谓的笨方法，我此前有在想有什么更好的计算方法能更好的优化计算效率呢。
+    // 然后想了一个方法并且进行了一个测试，就是先对粒子根据x轴进行快速排序，然后按顺序进行比较，
+    // 当比较到的粒子的水平距离大于lineDis的时候，就不用再比下去了。因为后面的都肯定会比当前粒子要更远，
+    // 想着就按照这样会减少计算量应该会提升效率。但是我对两个不同的计算方法都进行了耗时比较，结果还是原来的笨方法的性能更优。
+    // 因为这个新方法每次都要重新排序，这个计算量也是蛮大的。然后就暂时没想到其他了，如果读者有更好的idea不妨分享一下。
+    // 　　同事有问我那个鼠标划过，粒子会聚起来的效果很神奇，怎么做的，其实这个效果比想象中简单很多，而且在上面的代码里我也给出来了。
+    // 再给出一段保存鼠标位置的代码，很简单，就是鼠标移动的时候保存鼠标位置。
+    // 鼠标活动时，获取鼠标坐标
+    var warea = { x: null, y: null };
+    var animateHeader = document.getElementById("animateHeader");
+
+    animateHeader.onmousemove = function (e) {
+      e = e || window.event;
+
+      warea.x = e.clientX + 10;
+      warea.y = e.clientY;
+    };
+    // 保存了鼠标位置后，在每次动画循环的时候，把鼠标位置也当成一个粒子对象塞进数组进行比较：
+    // 每一帧循环的逻辑
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      bubDrawLine([warea].concat(dots));
+
+      RAF(animate);
+    }
+    // 而粒子往鼠标方向运动的代码，其实就这么一小截
+// 如果是鼠标，则让粒子向鼠标的位置移动
+if (ndot === warea && dis < 20000) {
+    dot.x -= xc * 0.01;
+    dot.y -= yc * 0.01;
+  }
+//   计算鼠标与粒子的距离，当鼠标与粒子之间的距离小于一定的时候，把粒子的位置更新为 “当前位置 - 鼠标粒子距离 * 0.01”即可。然后就会形成粒子往鼠标位置移动的效果了。
+
+// 　　整个效果就这样完成了，很简单，也很有意思，有兴趣的可以去研究一下发掘一些更好玩的效果。
+
+// 　　贴上这个demo的github地址：https://github.com/whxaxes/canvas-test/tree/gh-pages/src//Funny-demo/netparticle   -->
+  <!-- </script> -->
+  <script>
+      var canvas = document.getElementById("cas");
+      var ctx = canvas.getContext("2d");
+    
+      resize();
+      window.onresize = resize;
+    
+      function resize() {
+        canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      }
+    
+      var RAF = (function() {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
+              window.setTimeout(callback, 1000 / 60);
+            };
+      })();
+    
+      // 鼠标活动时，获取鼠标坐标
+      var warea = {x: null, y: null, max: 20000};
+      window.onmousemove = function(e) {
+        e = e || window.event;
+    
+        warea.x = e.clientX;
+        warea.y = e.clientY;
+      };
+      window.onmouseout = function(e) {
+        warea.x = null;
+        warea.y = null;
+      };
+    
+      // 添加粒子
+      // x，y为粒子坐标，xa, ya为粒子xy轴加速度，max为连线的最大距离
+      var dots = [];
+      for (var i = 0; i < 300; i++) {
+        var x = Math.random() * canvas.width;
+        var y = Math.random() * canvas.height;
+        var xa = Math.random() * 2 - 1;
+        var ya = Math.random() * 2 - 1;
+    
+        dots.push({
+          x: x,
+          y: y,
+          xa: xa,
+          ya: ya,
+          max: 6000
+        })
+      }
+    
+      // 延迟100秒开始执行动画，如果立即执行有时位置计算会出错
+      setTimeout(function() {
+        animate();
+      }, 100);
+    
+      // 每一帧循环的逻辑
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        // 将鼠标坐标添加进去，产生一个用于比对距离的点数组
+        var ndots = [warea].concat(dots);
+    
+        dots.forEach(function(dot) {
+    
+          // 粒子位移
+          dot.x += dot.xa;
+          dot.y += dot.ya;
+    
+          // 遇到边界将加速度反向
+          dot.xa *= (dot.x > canvas.width || dot.x < 0) ? -1 : 1;
+          dot.ya *= (dot.y > canvas.height || dot.y < 0) ? -1 : 1;
+    
+          // 绘制点
+          ctx.fillRect(dot.x - 0.5, dot.y - 0.5, 1, 1);
+    
+          // 循环比对粒子间的距离
+          for (var i = 0; i < ndots.length; i++) {
+            var d2 = ndots[i];
+    
+            if (dot === d2 || d2.x === null || d2.y === null) continue;
+    
+            var xc = dot.x - d2.x;
+            var yc = dot.y - d2.y;
+    
+            // 两个粒子之间的距离
+            var dis = xc * xc + yc * yc;
+    
+            // 距离比
+            var ratio;
+    
+            // 如果两个粒子之间的距离小于粒子对象的max值，则在两个粒子间画线
+            if (dis < d2.max) {
+    
+              // 如果是鼠标，则让粒子向鼠标的位置移动
+              if (d2 === warea && dis > (d2.max / 2)) {
+                dot.x -= xc * 0.03;
+                dot.y -= yc * 0.03;
+              }
+    
+              // 计算距离比
+              ratio = (d2.max - dis) / d2.max;
+    
+              // 画线
+              ctx.beginPath();
+              ctx.lineWidth = ratio / 2;
+              ctx.strokeStyle = 'rgba(0,0,0,' + (ratio + 0.2) + ')';
+              ctx.moveTo(dot.x, dot.y);
+              ctx.lineTo(d2.x, d2.y);
+              ctx.stroke();
+            }
+          }
+    
+          // 将已经计算过的粒子从数组中删除
+          ndots.splice(ndots.indexOf(dot), 1);
+        });
+    
+        RAF(animate);
+      }
+    </script>
+
+</body>
+
+</html>

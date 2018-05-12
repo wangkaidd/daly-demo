@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	* {
+		padding:0;
+		margin:0;
+		list-style:none;
+	}
+		li {
+			margin-left:0px;
+			text-align:center;
+			line-height: 50px;
+			height: 50px;
+			width: 50px;
+			background-color: yellowgreen;
+			border-radius:50%;
+		}
+		div {
+			margin:50px 50px;
+			
+			width: 800px;
+			height: 400px;
+			border:1px solid red;
+			box-sizing: border-box;
+		}
+		ul {
+			display: flex;
+			/*
+			伸缩样式
+			 */
+			/*布局开始的位置
+				row默认值：主轴水平方向，起点在左端
+				row-reverse：主轴为水平反向起点在右端
+				column 主轴为垂直方向，起点在上沿
+				column 主轴为垂直方向，起点在下沿
+			*/
+			flex-direction: row;
+			/*
+			换行方式
+			 */
+			/*
+			默认：no-wrap 不换行
+			wrap：换行
+			wrap-reverse：换行第一行在下方
+		
+			 */
+			flex-wrap:nowrap;
+			/*
+			项目在主轴方向上的对齐方式
+			flex-start:默认值，左对齐方式;
+			flex-end:右对齐;
+			center：居中
+			space-between：两端对齐
+			space-around:两侧间隔相等
+			 */
+			justify-content: space-around;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<ul>
+			<li>1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+		</ul>
+	</div>
+</body>
+</html>

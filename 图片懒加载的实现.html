@@ -1,0 +1,180 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>图片懒加载</title>
+</head>
+
+<body>
+	<!-- 原理：先将img标签中的src链接设为同一张图片（空白图片），将其真正的图片地址存储再img标签的自定义属性中（比如data-src）。
+	当js监听到该图片元素进入可视窗口时，即将自定义属性中的地址存储到src属性中，达到懒加载的效果。
+	这样做能防止页面一次性向服务器响应大量请求导致服务器响应慢，页面卡顿或崩溃等问题。 -->
+
+<!-- 既然懒加载的原理是基于判断元素是否出现在窗口可视范围内，首先我们写一个函数判断元素是否出现在可视范围内： -->
+<!-- <script>
+	function isVisible($node) {
+		// 获取window窗口的高度
+		var winH = $(window).height();
+		// 获取窗口被卷去的高度
+		var scrollTop = $(window).scrollTop();
+		// 获取该window元素距离窗口顶部的高度
+		var offSetTop = $(window).offSet().top;
+		if (offSetTop < winH + scrollTop) {
+			return true;
+		} else {
+			return false;
+		}
+	}; -->
+<!-- // 再添加上浏览器的事件监听函数，让浏览器每次滚动就检查元素是否出现在窗口可视范围内：
+	$(window).on("scroll", function () {
+		if (isVisible($node)) {
+			console.log(true);
+		}
+	})
+	// 让元素只在第一次被检查到时打印true，之后就不再打印了
+	var hasShowed = false;
+	$(window).on("sroll", function{
+		if (hasShowed) {
+			return;
+		} else {
+			if (isVisible($node)) {
+				hasShowed = !hasShowed;
+				console.log(true);
+			}
+		}
+	})
+</script>
+</body>
+
+</html> -->-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>demo loadmore</title>
+	<meta charset="utf-8">
+	<script src="jquery-1.12.1.js"></script>
+	<style type="text/css">
+		* {
+			text-align: center;
+		}
+
+		.box {
+			border: 1px solid #ccc;
+			padding: 10px;
+			margin: 10px;
+		}
+
+		.box:hover {
+			background-color: green;
+		}
+
+		.btn {
+			border: 1px solid #e27272;
+			border-radius: 2px;
+			color: #e27272;
+			padding: 10px;
+			margin: 10px;
+			display: inline-block;
+			cursor: pointer;
+			width: 64px;
+			height: 18px;
+			text-align: center;
+		}
+
+		.btn img {
+			width: 18px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="ct">
+		<div class="box">内容1</div>
+		<div class="box">内容2</div>
+	</div>
+	<a class="btn">加载更多</a>
+
+
+	<script type="text/javascript">
+
+		var $loadMoreBtn = $(".btn");
+		var clock;
+		loadMore($loadMoreBtn);
+		$(window).on("scroll", function (event) {
+			if (clock) {
+				clearTimeout(clock);
+			}
+			clock = setTimeout(function () {
+				if (!isVisible($loadMoreBtn)) {
+					console.log(111);
+					return;
+				}
+				loadMore($loadMoreBtn);
+			}, 500);
+		})
+			// 判断元素是否出现在可是范围
+		function isVisible($node) {
+			// 
+			var offsetH = $node.offset().top;
+
+			var winH = $(window).height();
+
+			var scrollH = $(window).scrollTop();
+
+			if (offsetH < winH + scrollH) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		function loadMore($node) {
+			var nowLength = $(".ct").children().size();
+			if ($(this).data("isLoading")) {
+				return;
+			}
+			$node.data("isLoading", true).html('<img src="loading.gif">');
+			$.ajax({
+				url: "demo3.php",
+				dataType: "json",
+				type: "get",
+				data: {
+					start: (nowLength + 1),
+					len: 20
+				},
+				success: function (json) {
+					onSuccess(json);
+				},
+				error: function () {
+					onError();
+				}
+			});
+
+			function onSuccess(json) {
+				if (json.status === 1) {
+					for (var i = 0; i < json.data.length; i++) {
+						$(".ct").append('<div class="box">' + json.data[i] + '</div>');
+					}
+					$node.data("isLoading", false).text("加载更多");
+				} else {
+					$node.data("isLoading", false).text('加载更多');
+					alert("加载失败，服务器原因");
+				}
+			}
+			
+			function onError() {
+
+				$this.data("isLoading", false).text('加载更多');
+				
+				alert("加载失败，网络原因");
+			}
+		};
+	</script>
+
+</body>
+
+</html>
